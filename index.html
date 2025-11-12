@@ -3,540 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Inventory Dashboard</title>
+    <title>SheetBest API Data</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
+        
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-        }
-
-        h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .controls {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
-
-        .api-section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .search-filter-section {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        button {
+        
+        .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        button.secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        #loading {
-            display: none;
+            padding: 30px;
             text-align: center;
-            color: white;
-            font-size: 18px;
-            margin: 20px 0;
         }
-
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        
         .spinner {
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 20px auto;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        #error {
-            display: none;
-            background: #ff4444;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 15px;
+        
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 20px;
             border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
         }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px;
+            margin-top: 20px;
         }
-
+        
         thead {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
-        th {
-            padding: 15px 10px;
+        
+        th, td {
+            padding: 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
             font-weight: 600;
-            font-size: 13px;
-            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
         }
-
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-
+        
         tbody tr:hover {
-            background: #f8f9ff;
+            background: #f5f5f5;
         }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-size: 16px;
+        
+        tbody tr:nth-child(even) {
+            background: #fafafa;
         }
-
-        .currency {
-            text-align: right;
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
         }
-
-        .qty {
-            text-align: center;
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-
-        .margin-positive {
-            color: #22c55e;
-            font-weight: 600;
-        }
-
-        .margin-negative {
-            color: #ef4444;
-            font-weight: 600;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-divisi {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-kategori {
-            background: #fce7f3;
-            color: #9f1239;
+        
+        .data-count {
+            color: #666;
+            margin: 10px 0;
+            font-size: 0.95em;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Product Inventory Dashboard</h1>
+        <div class="header">
+            <h1>📊 SheetBest API Data</h1>
+            <p>Fetching data from API</p>
+        </div>
         
-        <div class="controls">
-            <div class="api-section">
-                <div class="input-group">
-                    <label for="apiUrl">API URL:</label>
-                    <input type="text" id="apiUrl" placeholder="Enter API URL" value="https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac">
+        <div class="content">
+            <button class="refresh-btn" onclick="fetchData()">🔄 Refresh Data</button>
+            <div id="dataContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading data...
                 </div>
-            </div>
-
-            <div class="search-filter-section">
-                <div class="input-group">
-                    <label for="searchInput">🔍 Search by Barcode or Nama Produk:</label>
-                    <input type="text" id="searchInput" placeholder="Enter barcode or product name...">
-                </div>
-
-                <div class="filter-row">
-                    <div class="input-group">
-                        <label for="divisiFilter">Filter by Divisi:</label>
-                        <select id="divisiFilter">
-                            <option value="">All Divisi</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="kategoriFilter">Filter by Kategori:</label>
-                        <select id="kategoriFilter">
-                            <option value="">All Kategori</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="supplierFilter">Filter by Supplier:</label>
-                        <select id="supplierFilter">
-                            <option value="">All Supplier</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button onclick="fetchProducts()">Search & Filter</button>
-                    <button class="secondary" onclick="resetFilters()">Reset</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="loading">
-            <div class="spinner"></div>
-            Loading products...
-        </div>
-
-        <div id="error"></div>
-
-        <div class="stats" id="statsContainer"></div>
-
-        <div class="table-container">
-            <div class="table-wrapper">
-                <table id="productsTable">
-                    <thead>
-                        <tr>
-                            <th>Barcode</th>
-                            <th>Nama Produk</th>
-                            <th>H. Beli</th>
-                            <th>H. Jual</th>
-                            <th>Margin</th>
-                            <th>Divisi</th>
-                            <th>Departemen</th>
-                            <th>Kategori</th>
-                            <th>Sub Kategori</th>
-                            <th>Supplier</th>
-                            <th>Qty Terjual</th>
-                            <th>Qty/Bulan</th>
-                            <th>Qty/Hari</th>
-                            <th>Stok</th>
-                            <th>ITO</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsBody">
-                        <tr>
-                            <td colspan="15" class="no-data">No data available. Please fetch products from API.</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
     <script>
-        let allProducts = [];
-        let filteredProducts = [];
+        const API_URL = 'https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac';
 
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
-            }).format(value);
-        }
-
-        function formatNumber(value) {
-            return new Intl.NumberFormat('id-ID').format(value);
-        }
-
-        async function fetchProducts() {
-            const apiUrl = document.getElementById('apiUrl').value.trim();
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-
-            if (!apiUrl) {
-                showError('Please enter an API URL');
-                return;
-            }
-
-            loading.style.display = 'block';
-            error.style.display = 'none';
+        async function fetchData() {
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading data...
+                </div>
+            `;
 
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(API_URL);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
+                
                 const data = await response.json();
-                loading.style.display = 'none';
-
-                if (!data || (Array.isArray(data) && data.length === 0)) {
-                    showError('No products found');
-                    return;
-                }
-
-                allProducts = Array.isArray(data) ? data : [data];
-                populateFilters();
-                applyFilters();
-            } catch (err) {
-                loading.style.display = 'none';
-                showError(`Error fetching data: ${err.message}`);
+                displayData(data);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>Error fetching data:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
             }
         }
 
-        function populateFilters() {
-            const divisiSet = new Set();
-            const kategoriSet = new Set();
-            const supplierSet = new Set();
-
-            allProducts.forEach(product => {
-                if (product.divisi) divisiSet.add(product.divisi);
-                if (product.kategori) kategoriSet.add(product.kategori);
-                if (product.supplier) supplierSet.add(product.supplier);
-            });
-
-            populateSelect('divisiFilter', Array.from(divisiSet).sort());
-            populateSelect('kategoriFilter', Array.from(kategoriSet).sort());
-            populateSelect('supplierFilter', Array.from(supplierSet).sort());
-        }
-
-        function populateSelect(selectId, options) {
-            const select = document.getElementById(selectId);
-            const currentValue = select.value;
+        function displayData(data) {
+            const container = document.getElementById('dataContainer');
             
-            select.innerHTML = '<option value="">All ' + selectId.replace('Filter', '') + '</option>';
-            
-            options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.textContent = option;
-                select.appendChild(opt);
-            });
-
-            select.value = currentValue;
-        }
-
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-            const divisi = document.getElementById('divisiFilter').value;
-            const kategori = document.getElementById('kategoriFilter').value;
-            const supplier = document.getElementById('supplierFilter').value;
-
-            filteredProducts = allProducts.filter(product => {
-                const matchSearch = !searchTerm || 
-                    (product.barcode && product.barcode.toString().toLowerCase().includes(searchTerm)) ||
-                    (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm));
-                
-                const matchDivisi = !divisi || product.divisi === divisi;
-                const matchKategori = !kategori || product.kategori === kategori;
-                const matchSupplier = !supplier || product.supplier === supplier;
-
-                return matchSearch && matchDivisi && matchKategori && matchSupplier;
-            });
-
-            displayProducts();
-            displayStats();
-        }
-
-        function displayProducts() {
-            const tbody = document.getElementById('productsBody');
-            
-            if (filteredProducts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="15" class="no-data">No products match your filters.</td></tr>';
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>No data available.</p>';
                 return;
             }
 
-            tbody.innerHTML = '';
+            const keys = Object.keys(data[0]);
             
-            filteredProducts.forEach(product => {
-                const row = document.createElement('tr');
-                
-                const margin = product.margin || 0;
-                const marginClass = margin >= 0 ? 'margin-positive' : 'margin-negative';
-                
-                row.innerHTML = `
-                    <td>${product.barcode || '-'}</td>
-                    <td><strong>${product.nama_produk || '-'}</strong></td>
-                    <td class="currency">${product.hbeli ? formatCurrency(product.hbeli) : '-'}</td>
-                    <td class="currency">${product.hjual ? formatCurrency(product.hjual) : '-'}</td>
-                    <td class="currency ${marginClass}">${margin ? margin.toFixed(2) + '%' : '-'}</td>
-                    <td><span class="badge badge-divisi">${product.divisi || '-'}</span></td>
-                    <td>${product.departemen || '-'}</td>
-                    <td><span class="badge badge-kategori">${product.kategori || '-'}</span></td>
-                    <td>${product.subkategori || '-'}</td>
-                    <td>${product.supplier || '-'}</td>
-                    <td class="qty">${product.qty_terjual ? formatNumber(product.qty_terjual) : '-'}</td>
-                    <td class="qty">${product.qty_terjual_perbulan ? formatNumber(product.qty_terjual_perbulan) : '-'}</td>
-                    <td class="qty">${product.qty_terjual_perhari ? formatNumber(product.qty_terjual_perhari) : '-'}</td>
-                    <td class="qty">${product.stok ? formatNumber(product.stok) : '-'}</td>
-                    <td class="qty">${product.ITO ? product.ITO.toFixed(2) : '-'}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        function displayStats() {
-            const statsContainer = document.getElementById('statsContainer');
-            
-            const totalProducts = filteredProducts.length;
-            const totalStok = filteredProducts.reduce((sum, p) => sum + (p.stok || 0), 0);
-            const totalQtyTerjual = filteredProducts.reduce((sum, p) => sum + (p.qty_terjual || 0), 0);
-            const avgITO = filteredProducts.length > 0 
-                ? filteredProducts.reduce((sum, p) => sum + (p.ITO || 0), 0) / filteredProducts.length 
-                : 0;
-
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value">${formatNumber(totalProducts)}</div>
-                    <div class="stat-label">Total Products</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${formatNumber(totalStok)}</div>
-                    <div class="stat-label">Total Stok</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${formatNumber(totalQtyTerjual)}</div>
-                    <div class="stat-label">Total Qty Terjual</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${avgITO.toFixed(2)}</div>
-                    <div class="stat-label">Avg ITO</div>
-                </div>
+            let tableHTML = `
+                <div class="data-count">Found ${data.length} record(s)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            ${keys.map(key => `<th>${key}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                ${keys.map(key => `<td>${row[key] || ''}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             `;
+            
+            container.innerHTML = tableHTML;
         }
 
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('divisiFilter').value = '';
-            document.getElementById('kategoriFilter').value = '';
-            document.getElementById('supplierFilter').value = '';
-            applyFilters();
-        }
-
-        function showError(message) {
-            const error = document.getElementById('error');
-            error.textContent = message;
-            error.style.display = 'block';
-        }
-
-        // Event listeners for real-time filtering
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('divisiFilter').addEventListener('change', applyFilters);
-        document.getElementById('kategoriFilter').addEventListener('change', applyFilters);
-        document.getElementById('supplierFilter').addEventListener('change', applyFilters);
+        // Fetch data on page load
+        fetchData();
     </script>
 </body>
 </html>
