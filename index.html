@@ -328,15 +328,15 @@
         }
 
         function applyFilters() {
-            const barcodeSearch = document.getElementById('searchBarcode').value.toLowerCase();
-            const namaSearch = document.getElementById('searchNama').value.toLowerCase();
+            const barcodeSearch = document.getElementById('searchBarcode').value.toUpperCase();
+            const namaSearch = document.getElementById('searchNama').value.toUpperCase();
             const divisiFilter = document.getElementById('filterDivisi').value;
             const kategoriFilter = document.getElementById('filterKategori').value;
             const supplierFilter = document.getElementById('filterSupplier').value;
             
             filteredData = allData.filter(row => {
-                const barcodeMatch = !barcodeSearch || (row.barcode && row.barcode.toString().toLowerCase().includes(barcodeSearch));
-                const namaMatch = !namaSearch || (row['nama produk'] && row['nama produk'].toString().toLowerCase().includes(namaSearch));
+                const barcodeMatch = !barcodeSearch || (row.barcode && row.barcode.toString().toUpperCase().includes(barcodeSearch));
+                const namaMatch = !namaSearch || (row['nama produk'] && row['nama produk'].toString().toUpperCase().includes(namaSearch));
                 const divisiMatch = !divisiFilter || row.divisi === divisiFilter;
                 const kategoriMatch = !kategoriFilter || row.kategori === kategoriFilter;
                 const supplierMatch = !supplierFilter || row.supplier === supplierFilter;
@@ -396,3 +396,4 @@
     </script>
 </body>
 </html>
+
