@@ -300,9 +300,14 @@
             const supplierSet = new Set();
             
             allData.forEach(row => {
-                if (row.divisi) divisiSet.add(row.divisi);
-                if (row.kategori) kategoriSet.add(row.kategori);
-                if (row.supplier) supplierSet.add(row.supplier);
+                // Try different possible column name variations
+                const divisi = row.divisi || row.Divisi || row.DIVISI;
+                const kategori = row.kategori || row.Kategori || row.KATEGORI;
+                const supplier = row.supplier || row.Supplier || row.SUPPLIER;
+                
+                if (divisi) divisiSet.add(divisi);
+                if (kategori) kategoriSet.add(kategori);
+                if (supplier) supplierSet.add(supplier);
             });
             
             // Populate Divisi dropdown
@@ -328,18 +333,25 @@
         }
 
         function applyFilters() {
-            const barcodeSearch = document.getElementById('searchBarcode').value.toUpperCase();
-            const namaSearch = document.getElementById('searchNama').value.toUpperCase();
+            const barcodeSearch = document.getElementById('searchBarcode').value.toLowerCase();
+            const namaSearch = document.getElementById('searchNama').value.toLowerCase();
             const divisiFilter = document.getElementById('filterDivisi').value;
             const kategoriFilter = document.getElementById('filterKategori').value;
             const supplierFilter = document.getElementById('filterSupplier').value;
             
             filteredData = allData.filter(row => {
-                const barcodeMatch = !barcodeSearch || (row.barcode && row.barcode.toString().toUpperCase().includes(barcodeSearch));
-                const namaMatch = !namaSearch || (row['nama produk'] && row['nama produk'].toString().toUpperCase().includes(namaSearch));
-                const divisiMatch = !divisiFilter || row.divisi === divisiFilter;
-                const kategoriMatch = !kategoriFilter || row.kategori === kategoriFilter;
-                const supplierMatch = !supplierFilter || row.supplier === supplierFilter;
+                // Handle different column name variations
+                const barcode = row.barcode || row.Barcode || row.BARCODE || '';
+                const namaProduk = row['nama produk'] || row['Nama Produk'] || row['NAMA PRODUK'] || row.namaproduk || '';
+                const divisi = row.divisi || row.Divisi || row.DIVISI || '';
+                const kategori = row.kategori || row.Kategori || row.KATEGORI || '';
+                const supplier = row.supplier || row.Supplier || row.SUPPLIER || '';
+                
+                const barcodeMatch = !barcodeSearch || barcode.toString().toLowerCase().includes(barcodeSearch);
+                const namaMatch = !namaSearch || namaProduk.toString().toLowerCase().includes(namaSearch);
+                const divisiMatch = !divisiFilter || divisi === divisiFilter;
+                const kategoriMatch = !kategoriFilter || kategori === kategoriFilter;
+                const supplierMatch = !supplierFilter || supplier === supplierFilter;
                 
                 return barcodeMatch && namaMatch && divisiMatch && kategoriMatch && supplierMatch;
             });
@@ -396,4 +408,3 @@
     </script>
 </body>
 </html>
-
