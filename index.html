@@ -134,6 +134,63 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .clear-filters-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .clear-filters-btn:hover {
+            background: #5a6268;
+        }
+        
         .data-count {
             color: #666;
             margin: 10px 0;
@@ -150,6 +207,45 @@
         
         <div class="content">
             <button class="refresh-btn" onclick="fetchData()">🔄 Refresh Data</button>
+            
+            <div id="filtersContainer" style="display: none;">
+                <div class="filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="searchBarcode">🔍 Search Barcode</label>
+                            <input type="text" id="searchBarcode" placeholder="Enter barcode..." oninput="applyFilters()">
+                        </div>
+                        <div class="filter-group">
+                            <label for="searchNama">🔍 Search Nama Produk</label>
+                            <input type="text" id="searchNama" placeholder="Enter product name..." oninput="applyFilters()">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filterDivisi">📁 Filter Divisi</label>
+                            <select id="filterDivisi" onchange="applyFilters()">
+                                <option value="">All Divisi</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterKategori">📂 Filter Kategori</label>
+                            <select id="filterKategori" onchange="applyFilters()">
+                                <option value="">All Kategori</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterSupplier">🏪 Filter Supplier</label>
+                            <select id="filterSupplier" onchange="applyFilters()">
+                                <option value="">All Supplier</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="clear-filters-btn" onclick="clearFilters()">Clear All Filters</button>
+                </div>
+            </div>
+            
             <div id="dataContainer">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -161,6 +257,8 @@
 
     <script>
         const API_URL = 'https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac';
+        let allData = [];
+        let filteredData = [];
 
         async function fetchData() {
             const container = document.getElementById('dataContainer');
@@ -179,7 +277,12 @@
                 }
                 
                 const data = await response.json();
-                displayData(data);
+                allData = data;
+                filteredData = data;
+                
+                populateFilterOptions();
+                displayData(filteredData);
+                document.getElementById('filtersContainer').style.display = 'block';
             } catch (error) {
                 container.innerHTML = `
                     <div class="error">
@@ -188,6 +291,71 @@
                     </div>
                 `;
             }
+        }
+
+        function populateFilterOptions() {
+            // Get unique values for each filter
+            const divisiSet = new Set();
+            const kategoriSet = new Set();
+            const supplierSet = new Set();
+            
+            allData.forEach(row => {
+                if (row.divisi) divisiSet.add(row.divisi);
+                if (row.kategori) kategoriSet.add(row.kategori);
+                if (row.supplier) supplierSet.add(row.supplier);
+            });
+            
+            // Populate Divisi dropdown
+            const divisiSelect = document.getElementById('filterDivisi');
+            divisiSelect.innerHTML = '<option value="">All Divisi</option>';
+            Array.from(divisiSet).sort().forEach(divisi => {
+                divisiSelect.innerHTML += `<option value="${divisi}">${divisi}</option>`;
+            });
+            
+            // Populate Kategori dropdown
+            const kategoriSelect = document.getElementById('filterKategori');
+            kategoriSelect.innerHTML = '<option value="">All Kategori</option>';
+            Array.from(kategoriSet).sort().forEach(kategori => {
+                kategoriSelect.innerHTML += `<option value="${kategori}">${kategori}</option>`;
+            });
+            
+            // Populate Supplier dropdown
+            const supplierSelect = document.getElementById('filterSupplier');
+            supplierSelect.innerHTML = '<option value="">All Supplier</option>';
+            Array.from(supplierSet).sort().forEach(supplier => {
+                supplierSelect.innerHTML += `<option value="${supplier}">${supplier}</option>`;
+            });
+        }
+
+        function applyFilters() {
+            const barcodeSearch = document.getElementById('searchBarcode').value.toLowerCase();
+            const namaSearch = document.getElementById('searchNama').value.toLowerCase();
+            const divisiFilter = document.getElementById('filterDivisi').value;
+            const kategoriFilter = document.getElementById('filterKategori').value;
+            const supplierFilter = document.getElementById('filterSupplier').value;
+            
+            filteredData = allData.filter(row => {
+                const barcodeMatch = !barcodeSearch || (row.barcode && row.barcode.toString().toLowerCase().includes(barcodeSearch));
+                const namaMatch = !namaSearch || (row['nama produk'] && row['nama produk'].toString().toLowerCase().includes(namaSearch));
+                const divisiMatch = !divisiFilter || row.divisi === divisiFilter;
+                const kategoriMatch = !kategoriFilter || row.kategori === kategoriFilter;
+                const supplierMatch = !supplierFilter || row.supplier === supplierFilter;
+                
+                return barcodeMatch && namaMatch && divisiMatch && kategoriMatch && supplierMatch;
+            });
+            
+            displayData(filteredData);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchBarcode').value = '';
+            document.getElementById('searchNama').value = '';
+            document.getElementById('filterDivisi').value = '';
+            document.getElementById('filterKategori').value = '';
+            document.getElementById('filterSupplier').value = '';
+            
+            filteredData = allData;
+            displayData(filteredData);
         }
 
         function displayData(data) {
@@ -201,7 +369,7 @@
             const keys = Object.keys(data[0]);
             
             let tableHTML = `
-                <div class="data-count">Found ${data.length} record(s)</div>
+                <div class="data-count">Showing ${data.length} of ${allData.length} record(s)</div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
