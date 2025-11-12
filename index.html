@@ -3,408 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SheetBest API Data</title>
+    <title>Product Data Table</title>
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css">
+    
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background-color: #f5f5f5;
+            margin: 0;
+            font-size: 13px;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
+            max-width: 100%;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .table-wrapper {
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 600px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            color: #667eea;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-        }
-        
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 0.5px;
-        }
-        
-        tbody tr:hover {
-            background: #f5f5f5;
-        }
-        
-        tbody tr:nth-child(even) {
-            background: #fafafa;
-        }
-        
-        .refresh-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
-            font-size: 1em;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .filters {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            color: #333;
             margin-bottom: 15px;
+            font-size: 22px;
         }
         
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .filter-group label {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 5px;
-        }
-        
-        .filter-group input,
-        .filter-group select {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95em;
-            transition: border-color 0.3s;
-        }
-        
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .clear-filters-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .clear-filters-btn:hover {
-            background: #5a6268;
-        }
-        
-        .data-count {
+        #loadingMsg {
+            text-align: center;
+            padding: 20px;
             color: #666;
-            margin: 10px 0;
-            font-size: 0.95em;
+        }
+        
+        table.dataTable {
+            width: 100% !important;
+            font-size: 12px;
+        }
+        
+        table.dataTable thead th {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        
+        table.dataTable tbody td {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        .dataTables_wrapper {
+            padding: 10px 0;
+            font-size: 12px;
+        }
+        
+        .dataTables_filter input,
+        .dataTables_length select {
+            font-size: 12px;
+        }
+        
+        /* Style for column search inputs */
+        .column-search {
+            width: 100%;
+            padding: 4px 6px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .column-search:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        thead tr:nth-child(2) th {
+            padding: 4px;
+        }
+        
+        /* Style for Select2 */
+        .select2-container {
+            min-width: 180px;
+            font-size: 12px;
+        }
+        
+        .select2-container .select2-selection--single {
+            height: 34px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 34px;
+            padding-left: 10px;
+            font-size: 12px;
+        }
+        
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 32px;
+        }
+        
+        .select2-results__option {
+            font-size: 12px;
+        }
+        
+        #clearFilters:hover {
+            background-color: #d32f2f;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📊 SheetBest API Data</h1>
-            <p>Fetching data from API</p>
+        <h1>Product Data</h1>
+        <div id="loadingMsg">Loading data...</div>
+        
+        <div id="filters" style="display:none; margin-bottom: 15px;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                <div>
+                    <label for="divisiFilter" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px;">Divisi:</label>
+                    <select id="divisiFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 180px; font-size: 12px;">
+                        <option value="">Semua Divisi</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="kategoriFilter" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px;">Kategori:</label>
+                    <select id="kategoriFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 180px; font-size: 12px;">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="supplierFilter" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px;">Supplier:</label>
+                    <select id="supplierFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 180px; font-size: 12px;">
+                        <option value="">Semua Supplier</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="clearFilters" style="padding: 6px 16px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; font-size: 12px;">
+                        Hapus Semua Filter
+                    </button>
+                </div>
+            </div>
         </div>
         
-        <div class="content">
-            <button class="refresh-btn" onclick="fetchData()">🔄 Refresh Data</button>
-            
-            <div id="filtersContainer" style="display: none;">
-                <div class="filters">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label for="searchBarcode">🔍 Search Barcode</label>
-                            <input type="text" id="searchBarcode" placeholder="Enter barcode..." oninput="applyFilters()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="searchNama">🔍 Search Nama Produk</label>
-                            <input type="text" id="searchNama" placeholder="Enter product name..." oninput="applyFilters()">
-                        </div>
-                    </div>
-                    
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label for="filterDivisi">📁 Filter Divisi</label>
-                            <select id="filterDivisi" onchange="applyFilters()">
-                                <option value="">All Divisi</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterKategori">📂 Filter Kategori</label>
-                            <select id="filterKategori" onchange="applyFilters()">
-                                <option value="">All Kategori</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterSupplier">🏪 Filter Supplier</label>
-                            <select id="filterSupplier" onchange="applyFilters()">
-                                <option value="">All Supplier</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button class="clear-filters-btn" onclick="clearFilters()">Clear All Filters</button>
-                </div>
-            </div>
-            
-            <div id="dataContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    Loading data...
-                </div>
-            </div>
-        </div>
+        <table id="productTable" class="display" style="display:none; width:100%">
+            <thead>
+                <tr>
+                    <th>Barcode</th>
+                    <th>Nama Produk</th>
+                    <th>H Beli</th>
+                    <th>H Jual</th>
+                    <th>Margin</th>
+                    <th>Divisi</th>
+                    <th>Departemen</th>
+                    <th>Kategori</th>
+                    <th>Subkategori</th>
+                    <th>Supplier</th>
+                    <th>Qty Terjual</th>
+                    <th>Qty Terjual/Bulan</th>
+                    <th>Qty Terjual/Hari</th>
+                    <th>Stok</th>
+                    <th>ITO</th>
+                </tr>
+                <tr>
+                    <th><input type="text" class="column-search" placeholder="Cari barcode..." /></th>
+                    <th><input type="text" class="column-search" placeholder="Cari nama produk..." /></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
     </div>
 
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    
+    <!-- Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
     <script>
-        const API_URL = 'https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac';
-        let allData = [];
-        let filteredData = [];
-
-        async function fetchData() {
-            const container = document.getElementById('dataContainer');
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    Loading data...
-                </div>
-            `;
-
-            try {
-                const response = await fetch(API_URL);
+        // Fetch data from API
+        fetch('https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data received:', data);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                // Hide loading message
+                document.getElementById('loadingMsg').style.display = 'none';
                 
-                const data = await response.json();
-                allData = data;
-                filteredData = data;
+                // Show filters and table
+                document.getElementById('filters').style.display = 'block';
+                document.getElementById('productTable').style.display = 'table';
                 
-                populateFilterOptions();
-                displayData(filteredData);
-                document.getElementById('filtersContainer').style.display = 'block';
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="error">
-                        <strong>Error fetching data:</strong><br>
-                        ${error.message}
-                    </div>
-                `;
-            }
-        }
-
-        function populateFilterOptions() {
-            // Get unique values for each filter
-            const divisiSet = new Set();
-            const kategoriSet = new Set();
-            const supplierSet = new Set();
-            
-            allData.forEach(row => {
-                // Try different possible column name variations
-                const divisi = row.divisi || row.Divisi || row.DIVISI;
-                const kategori = row.kategori || row.Kategori || row.KATEGORI;
-                const supplier = row.supplier || row.Supplier || row.SUPPLIER;
+                // Get unique values for filters
+                const divisiSet = new Set();
+                const kategoriSet = new Set();
+                const supplierSet = new Set();
                 
-                if (divisi) divisiSet.add(divisi);
-                if (kategori) kategoriSet.add(kategori);
-                if (supplier) supplierSet.add(supplier);
+                data.forEach(item => {
+                    if (item.DIVISI) divisiSet.add(item.DIVISI);
+                    if (item.KATEGORI) kategoriSet.add(item.KATEGORI);
+                    if (item.SUPPLIER) supplierSet.add(item.SUPPLIER);
+                });
+                
+                // Populate filter dropdowns
+                const divisiFilter = document.getElementById('divisiFilter');
+                const kategoriFilter = document.getElementById('kategoriFilter');
+                const supplierFilter = document.getElementById('supplierFilter');
+                
+                Array.from(divisiSet).sort().forEach(divisi => {
+                    const option = document.createElement('option');
+                    option.value = divisi;
+                    option.textContent = divisi;
+                    divisiFilter.appendChild(option);
+                });
+                
+                Array.from(kategoriSet).sort().forEach(kategori => {
+                    const option = document.createElement('option');
+                    option.value = kategori;
+                    option.textContent = kategori;
+                    kategoriFilter.appendChild(option);
+                });
+                
+                Array.from(supplierSet).sort().forEach(supplier => {
+                    const option = document.createElement('option');
+                    option.value = supplier;
+                    option.textContent = supplier;
+                    supplierFilter.appendChild(option);
+                });
+                
+                // Initialize Select2 on filter dropdowns
+                $('#divisiFilter').select2({
+                    placeholder: 'Semua Divisi',
+                    allowClear: true
+                });
+                
+                $('#kategoriFilter').select2({
+                    placeholder: 'Semua Kategori',
+                    allowClear: true
+                });
+                
+                $('#supplierFilter').select2({
+                    placeholder: 'Semua Supplier',
+                    allowClear: true
+                });
+                
+                // Initialize DataTable with the fetched data
+                const table = $('#productTable').DataTable({
+                    data: data,
+                    columns: [
+                        { data: 'BARCODE' },
+                        { data: 'NAMA PRODUK' },
+                        { data: 'HBELI' },
+                        { data: 'HJUAL' },
+                        { data: 'MARGIN' },
+                        { data: 'DIVISI' },
+                        { data: 'DEPARTEMEN' },
+                        { data: 'KATEGORI' },
+                        { data: 'SUBKATEGORI' },
+                        { data: 'SUPPLIER' },
+                        { data: 'QTY TERJUAL' },
+                        { data: 'QTY TERJUAL PERBULAN' },
+                        { data: 'QTY TERJUAL PERHARI' },
+                        { data: 'STOK' },
+                        { data: 'ITO' }
+                    ],
+                    pageLength: 25,
+                    order: [[0, 'asc']],
+                    responsive: true,
+                    language: {
+                        search: "Cari:",
+                        lengthMenu: "Tampilkan _MENU_ data per halaman",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                        infoFiltered: "(difilter dari _MAX_ total data)",
+                        paginate: {
+                            first: "Pertama",
+                            last: "Terakhir",
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        },
+                        zeroRecords: "Tidak ada data yang ditemukan"
+                    }
+                });
+                
+                // Add column search functionality for Barcode (column 0)
+                $('#productTable thead tr:nth-child(2) th:eq(0) input').on('keyup change', function() {
+                    table.column(0).search(this.value).draw();
+                });
+                
+                // Add column search functionality for Nama Produk (column 1)
+                $('#productTable thead tr:nth-child(2) th:eq(1) input').on('keyup change', function() {
+                    table.column(1).search(this.value).draw();
+                });
+                
+                // Add filter event listeners for Select2 dropdowns
+                $('#divisiFilter').on('change', function() {
+                    table.column(5).search(this.value).draw();
+                });
+                
+                $('#kategoriFilter').on('change', function() {
+                    table.column(7).search(this.value).draw();
+                });
+                
+                $('#supplierFilter').on('change', function() {
+                    table.column(9).search(this.value).draw();
+                });
+                
+                // Clear all filters button
+                $('#clearFilters').on('click', function() {
+                    // Clear Select2 dropdowns
+                    $('#divisiFilter').val('').trigger('change');
+                    $('#kategoriFilter').val('').trigger('change');
+                    $('#supplierFilter').val('').trigger('change');
+                    
+                    // Clear column search inputs
+                    $('#productTable thead tr:nth-child(2) th input').val('');
+                    
+                    // Clear DataTable search
+                    table.search('').columns().search('').draw();
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById('loadingMsg').innerHTML = 
+                    '<p style="color: red;">Error loading data. Please check the console for details.</p>';
             });
-            
-            // Populate Divisi dropdown
-            const divisiSelect = document.getElementById('filterDivisi');
-            divisiSelect.innerHTML = '<option value="">All Divisi</option>';
-            Array.from(divisiSet).sort().forEach(divisi => {
-                divisiSelect.innerHTML += `<option value="${divisi}">${divisi}</option>`;
-            });
-            
-            // Populate Kategori dropdown
-            const kategoriSelect = document.getElementById('filterKategori');
-            kategoriSelect.innerHTML = '<option value="">All Kategori</option>';
-            Array.from(kategoriSet).sort().forEach(kategori => {
-                kategoriSelect.innerHTML += `<option value="${kategori}">${kategori}</option>`;
-            });
-            
-            // Populate Supplier dropdown
-            const supplierSelect = document.getElementById('filterSupplier');
-            supplierSelect.innerHTML = '<option value="">All Supplier</option>';
-            Array.from(supplierSet).sort().forEach(supplier => {
-                supplierSelect.innerHTML += `<option value="${supplier}">${supplier}</option>`;
-            });
-        }
-
-        function applyFilters() {
-            const barcodeSearch = document.getElementById('searchBarcode').value.toLowerCase();
-            const namaSearch = document.getElementById('searchNama').value.toLowerCase();
-            const divisiFilter = document.getElementById('filterDivisi').value;
-            const kategoriFilter = document.getElementById('filterKategori').value;
-            const supplierFilter = document.getElementById('filterSupplier').value;
-            
-            filteredData = allData.filter(row => {
-                // Handle different column name variations
-                const barcode = row.barcode || row.Barcode || row.BARCODE || '';
-                const namaProduk = row['nama produk'] || row['Nama Produk'] || row['NAMA PRODUK'] || row.namaproduk || '';
-                const divisi = row.divisi || row.Divisi || row.DIVISI || '';
-                const kategori = row.kategori || row.Kategori || row.KATEGORI || '';
-                const supplier = row.supplier || row.Supplier || row.SUPPLIER || '';
-                
-                const barcodeMatch = !barcodeSearch || barcode.toString().toLowerCase().includes(barcodeSearch);
-                const namaMatch = !namaSearch || namaProduk.toString().toLowerCase().includes(namaSearch);
-                const divisiMatch = !divisiFilter || divisi === divisiFilter;
-                const kategoriMatch = !kategoriFilter || kategori === kategoriFilter;
-                const supplierMatch = !supplierFilter || supplier === supplierFilter;
-                
-                return barcodeMatch && namaMatch && divisiMatch && kategoriMatch && supplierMatch;
-            });
-            
-            displayData(filteredData);
-        }
-
-        function clearFilters() {
-            document.getElementById('searchBarcode').value = '';
-            document.getElementById('searchNama').value = '';
-            document.getElementById('filterDivisi').value = '';
-            document.getElementById('filterKategori').value = '';
-            document.getElementById('filterSupplier').value = '';
-            
-            filteredData = allData;
-            displayData(filteredData);
-        }
-
-        function displayData(data) {
-            const container = document.getElementById('dataContainer');
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p>No data available.</p>';
-                return;
-            }
-
-            const keys = Object.keys(data[0]);
-            
-            let tableHTML = `
-                <div class="data-count">Showing ${data.length} of ${allData.length} record(s)</div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                ${keys.map(key => `<th>${key}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(row => `
-                                <tr>
-                                    ${keys.map(key => `<td>${row[key] || ''}</td>`).join('')}
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            container.innerHTML = tableHTML;
-        }
-
-        // Fetch data on page load
-        fetchData();
     </script>
 </body>
 </html>
