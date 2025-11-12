@@ -43,6 +43,14 @@
             padding: 30px;
         }
         
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 600px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
         .loading {
             text-align: center;
             padding: 40px;
@@ -77,12 +85,15 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 0;
         }
         
         thead {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         
         th, td {
@@ -191,20 +202,22 @@
             
             let tableHTML = `
                 <div class="data-count">Found ${data.length} record(s)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            ${keys.map(key => `<th>${key}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(row => `
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
                             <tr>
-                                ${keys.map(key => `<td>${row[key] || ''}</td>`).join('')}
+                                ${keys.map(key => `<th>${key}</th>`).join('')}
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    ${keys.map(key => `<td>${row[key] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
             
             container.innerHTML = tableHTML;
