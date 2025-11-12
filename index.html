@@ -3,16 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Viewer</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>API Items Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #error {
+            display: none;
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+
+        .item-title {
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .item-id {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .item-body {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel" src="app.jsx"></script>
-    <h1>RAHHHHH</h1>>
-</body>
+    <div class="container">
+        <h1>📦 API Items Display</h1>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="apiUrl">API URL:</label>
+                <input type="text" id="apiUrl" placeholder="Enter API URL" value="https://jsonplaceholder.typicode.com/posts">
+            </div>
+            <button onclick="fetchItems()">Fetch Items</button>
+        </div>
 
+        <div id="loading">
+            <div class="spinner"></div>
+            Loading items...
+        </div>
+
+        <div id="error"></div>
+
+        <div id="itemsContainer" class="items-grid"></div>
+    </div>
+
+    <script>
+        async function fetchItems() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('itemsContainer');
+
+            if (!apiUrl) {
+                showError('Please enter an API URL');
+                return;
+            }
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (!data || (Array.isArray(data) && data.length === 0)) {
+                    showError('No items found');
+                    return;
+                }
+
+                displayItems(data);
+            } catch (err) {
+                loading.style.display = 'none';
+                showError(`Error fetching data: ${err.message}`);
+            }
+        }
+
+        function displayItems(data) {
+            const container = document.getElementById('itemsContainer');
+            const items = Array.isArray(data) ? data : [data];
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+
+                let content = '';
+                
+                if (item.title || item.name) {
+                    content += `<div class="item-title">${item.title || item.name}</div>`;
+                }
+                
+                if (item.id) {
+                    content += `<div class="item-id">ID: ${item.id}</div>`;
+                }
+                
+                if (item.body || item.description) {
+                    content += `<div class="item-body">${item.body || item.description}</div>`;
+                } else {
+                    content += `<div class="item-body"><pre>${JSON.stringify(item, null, 2)}</pre></div>`;
+                }
+
+                card.innerHTML = content;
+                container.appendChild(card);
+            });
+        }
+
+        function showError(message) {
+            const error = document.getElementById('error');
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        // Fetch items on page load
+        window.addEventListener('load', fetchItems);
+    </script>
+</body>
 </html>
