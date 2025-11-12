@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Items Display</title>
+    <title>Product Inventory Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -33,10 +33,22 @@
 
         .controls {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 10px;
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .api-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .search-filter-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
 
         .input-group {
@@ -48,9 +60,10 @@
             margin-bottom: 5px;
             font-weight: 600;
             color: #333;
+            font-size: 14px;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             border: 2px solid #ddd;
@@ -59,9 +72,21 @@
             transition: border-color 0.3s;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         button {
@@ -81,8 +106,8 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        button:active {
-            transform: translateY(0);
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
         #loading {
@@ -118,72 +143,226 @@
             text-align: center;
         }
 
-        .items-grid {
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .item-card {
+        .stat-card {
             background: white;
-            padding: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            background: white;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
         }
 
-        .item-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        .table-wrapper {
+            overflow-x: auto;
         }
 
-        .item-title {
-            color: #667eea;
-            font-size: 1.2rem;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px 10px;
+            text-align: left;
             font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 13px;
+            white-space: nowrap;
         }
 
-        .item-id {
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
             color: #999;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
+            font-size: 16px;
         }
 
-        .item-body {
-            color: #666;
-            line-height: 1.6;
+        .currency {
+            text-align: right;
+        }
+
+        .qty {
+            text-align: center;
+        }
+
+        .margin-positive {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .margin-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-divisi {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-kategori {
+            background: #fce7f3;
+            color: #9f1239;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📦 API Items Display</h1>
+        <h1>📊 Product Inventory Dashboard</h1>
         
         <div class="controls">
-            <div class="input-group">
-                <label for="apiUrl">API URL:</label>
-                <input type="text" id="apiUrl" placeholder="Enter API URL" value="https://jsonplaceholder.typicode.com/posts">
+            <div class="api-section">
+                <div class="input-group">
+                    <label for="apiUrl">API URL:</label>
+                    <input type="text" id="apiUrl" placeholder="Enter API URL" value="https://api.sheetbest.com/sheets/aba461f9-f680-4184-96a7-1a1405627cac">
+                </div>
             </div>
-            <button onclick="fetchItems()">Fetch Items</button>
+
+            <div class="search-filter-section">
+                <div class="input-group">
+                    <label for="searchInput">🔍 Search by Barcode or Nama Produk:</label>
+                    <input type="text" id="searchInput" placeholder="Enter barcode or product name...">
+                </div>
+
+                <div class="filter-row">
+                    <div class="input-group">
+                        <label for="divisiFilter">Filter by Divisi:</label>
+                        <select id="divisiFilter">
+                            <option value="">All Divisi</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="kategoriFilter">Filter by Kategori:</label>
+                        <select id="kategoriFilter">
+                            <option value="">All Kategori</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="supplierFilter">Filter by Supplier:</label>
+                        <select id="supplierFilter">
+                            <option value="">All Supplier</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="fetchProducts()">Search & Filter</button>
+                    <button class="secondary" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
         </div>
 
         <div id="loading">
             <div class="spinner"></div>
-            Loading items...
+            Loading products...
         </div>
 
         <div id="error"></div>
 
-        <div id="itemsContainer" class="items-grid"></div>
+        <div class="stats" id="statsContainer"></div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Barcode</th>
+                            <th>Nama Produk</th>
+                            <th>H. Beli</th>
+                            <th>H. Jual</th>
+                            <th>Margin</th>
+                            <th>Divisi</th>
+                            <th>Departemen</th>
+                            <th>Kategori</th>
+                            <th>Sub Kategori</th>
+                            <th>Supplier</th>
+                            <th>Qty Terjual</th>
+                            <th>Qty/Bulan</th>
+                            <th>Qty/Hari</th>
+                            <th>Stok</th>
+                            <th>ITO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsBody">
+                        <tr>
+                            <td colspan="15" class="no-data">No data available. Please fetch products from API.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        async function fetchItems() {
+        let allProducts = [];
+        let filteredProducts = [];
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+
+        function formatNumber(value) {
+            return new Intl.NumberFormat('id-ID').format(value);
+        }
+
+        async function fetchProducts() {
             const apiUrl = document.getElementById('apiUrl').value.trim();
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
-            const container = document.getElementById('itemsContainer');
 
             if (!apiUrl) {
                 showError('Please enter an API URL');
@@ -192,7 +371,6 @@
 
             loading.style.display = 'block';
             error.style.display = 'none';
-            container.innerHTML = '';
 
             try {
                 const response = await fetch(apiUrl);
@@ -205,44 +383,147 @@
                 loading.style.display = 'none';
 
                 if (!data || (Array.isArray(data) && data.length === 0)) {
-                    showError('No items found');
+                    showError('No products found');
                     return;
                 }
 
-                displayItems(data);
+                allProducts = Array.isArray(data) ? data : [data];
+                populateFilters();
+                applyFilters();
             } catch (err) {
                 loading.style.display = 'none';
                 showError(`Error fetching data: ${err.message}`);
             }
         }
 
-        function displayItems(data) {
-            const container = document.getElementById('itemsContainer');
-            const items = Array.isArray(data) ? data : [data];
+        function populateFilters() {
+            const divisiSet = new Set();
+            const kategoriSet = new Set();
+            const supplierSet = new Set();
 
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-
-                let content = '';
-                
-                if (item.title || item.name) {
-                    content += `<div class="item-title">${item.title || item.name}</div>`;
-                }
-                
-                if (item.id) {
-                    content += `<div class="item-id">ID: ${item.id}</div>`;
-                }
-                
-                if (item.body || item.description) {
-                    content += `<div class="item-body">${item.body || item.description}</div>`;
-                } else {
-                    content += `<div class="item-body"><pre>${JSON.stringify(item, null, 2)}</pre></div>`;
-                }
-
-                card.innerHTML = content;
-                container.appendChild(card);
+            allProducts.forEach(product => {
+                if (product.divisi) divisiSet.add(product.divisi);
+                if (product.kategori) kategoriSet.add(product.kategori);
+                if (product.supplier) supplierSet.add(product.supplier);
             });
+
+            populateSelect('divisiFilter', Array.from(divisiSet).sort());
+            populateSelect('kategoriFilter', Array.from(kategoriSet).sort());
+            populateSelect('supplierFilter', Array.from(supplierSet).sort());
+        }
+
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">All ' + selectId.replace('Filter', '') + '</option>';
+            
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+
+            select.value = currentValue;
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const divisi = document.getElementById('divisiFilter').value;
+            const kategori = document.getElementById('kategoriFilter').value;
+            const supplier = document.getElementById('supplierFilter').value;
+
+            filteredProducts = allProducts.filter(product => {
+                const matchSearch = !searchTerm || 
+                    (product.barcode && product.barcode.toString().toLowerCase().includes(searchTerm)) ||
+                    (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm));
+                
+                const matchDivisi = !divisi || product.divisi === divisi;
+                const matchKategori = !kategori || product.kategori === kategori;
+                const matchSupplier = !supplier || product.supplier === supplier;
+
+                return matchSearch && matchDivisi && matchKategori && matchSupplier;
+            });
+
+            displayProducts();
+            displayStats();
+        }
+
+        function displayProducts() {
+            const tbody = document.getElementById('productsBody');
+            
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="15" class="no-data">No products match your filters.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            filteredProducts.forEach(product => {
+                const row = document.createElement('tr');
+                
+                const margin = product.margin || 0;
+                const marginClass = margin >= 0 ? 'margin-positive' : 'margin-negative';
+                
+                row.innerHTML = `
+                    <td>${product.barcode || '-'}</td>
+                    <td><strong>${product.nama_produk || '-'}</strong></td>
+                    <td class="currency">${product.hbeli ? formatCurrency(product.hbeli) : '-'}</td>
+                    <td class="currency">${product.hjual ? formatCurrency(product.hjual) : '-'}</td>
+                    <td class="currency ${marginClass}">${margin ? margin.toFixed(2) + '%' : '-'}</td>
+                    <td><span class="badge badge-divisi">${product.divisi || '-'}</span></td>
+                    <td>${product.departemen || '-'}</td>
+                    <td><span class="badge badge-kategori">${product.kategori || '-'}</span></td>
+                    <td>${product.subkategori || '-'}</td>
+                    <td>${product.supplier || '-'}</td>
+                    <td class="qty">${product.qty_terjual ? formatNumber(product.qty_terjual) : '-'}</td>
+                    <td class="qty">${product.qty_terjual_perbulan ? formatNumber(product.qty_terjual_perbulan) : '-'}</td>
+                    <td class="qty">${product.qty_terjual_perhari ? formatNumber(product.qty_terjual_perhari) : '-'}</td>
+                    <td class="qty">${product.stok ? formatNumber(product.stok) : '-'}</td>
+                    <td class="qty">${product.ITO ? product.ITO.toFixed(2) : '-'}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            const totalProducts = filteredProducts.length;
+            const totalStok = filteredProducts.reduce((sum, p) => sum + (p.stok || 0), 0);
+            const totalQtyTerjual = filteredProducts.reduce((sum, p) => sum + (p.qty_terjual || 0), 0);
+            const avgITO = filteredProducts.length > 0 
+                ? filteredProducts.reduce((sum, p) => sum + (p.ITO || 0), 0) / filteredProducts.length 
+                : 0;
+
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${formatNumber(totalProducts)}</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${formatNumber(totalStok)}</div>
+                    <div class="stat-label">Total Stok</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${formatNumber(totalQtyTerjual)}</div>
+                    <div class="stat-label">Total Qty Terjual</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgITO.toFixed(2)}</div>
+                    <div class="stat-label">Avg ITO</div>
+                </div>
+            `;
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('divisiFilter').value = '';
+            document.getElementById('kategoriFilter').value = '';
+            document.getElementById('supplierFilter').value = '';
+            applyFilters();
         }
 
         function showError(message) {
@@ -251,8 +532,11 @@
             error.style.display = 'block';
         }
 
-        // Fetch items on page load
-        window.addEventListener('load', fetchItems);
+        // Event listeners for real-time filtering
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('divisiFilter').addEventListener('change', applyFilters);
+        document.getElementById('kategoriFilter').addEventListener('change', applyFilters);
+        document.getElementById('supplierFilter').addEventListener('change', applyFilters);
     </script>
 </body>
 </html>
